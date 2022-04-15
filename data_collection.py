@@ -4,9 +4,15 @@ from datetime import datetime
 from uuid import uuid1
 print(cv2.__version__)
 
+try:
+    os.makedirs('Dataset/free')
+    os.makedirs('Dataset/blocked')
+except FileExistsError:
+    print('Directories not created because they already exist')
+
 dispW = 1280
 dispH = 720
-flip = 2
+flip = 0
 
 #nooby 21
 camSet='nvarguscamerasrc !  video/x-raw(memory:NVMM), width=3264, height=2464, format=NV12, framerate=21/1 ! nvvidconv flip-method='+str(flip)+' ! video/x-raw, width='+str(dispW)+', height='+str(dispH)+', format=BGRx ! videoconvert ! video/x-raw, format=BGR ! appsink'
@@ -17,7 +23,8 @@ camSet='nvarguscamerasrc !  video/x-raw(memory:NVMM), width=3264, height=2464, f
 
 cam = cv2.VideoCapture(camSet, cv2.CAP_GSTREAMER)
 
-free_counter = blocked_counter = 0
+free_counter = len(os.listdir('Dataset/free')) - 1
+blocked_counter = len(os.listdir('Dataset/blocked')) - 1
 
 while True:
     ret, frame = cam.read()
@@ -27,11 +34,11 @@ while True:
         break
     elif key == ord('1'):
         free_counter = free_counter + 1
-        image_path = os.path.join('dataset/free', str(free_counter) + '_1.jpg')
+        image_path = os.path.join('Dataset/free', str(len(os.listdir('Dataset/free'))) + '_1.jpg')
         cv2.imwrite(image_path, frame)
     elif key == ord('2'):
         blocked_counter = blocked_counter + 1
-        image_path = os.path.join('dataset/blocked', str(blocked_counter) + '_0.jpg')
+        image_path = os.path.join('Dataset/blocked', str(len(os.listdir('Dataset/blocked'))) + '_0.jpg')
         cv2.imwrite(image_path, frame)
     
     font = cv2.FONT_HERSHEY_DUPLEX
