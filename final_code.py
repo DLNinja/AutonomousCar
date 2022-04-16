@@ -18,10 +18,10 @@ print("Imported modules")
 #model.load_state_dict(torch.load('best_model_resnet18.pth'))
 bus = smbus.SMBus(1)
 address = 8
+data = [0,0]
 
 def writeNumber(value):
-    bus.write_byte(address, value)
-    #bus.write_byte_data(address, 0, value)
+    bus.write_byte_data(address, 1, value)
     return -1
 
 
@@ -133,8 +133,9 @@ while True:
             #print("Target found, coordinates: "+str(xc)+":"+str(yc))
             if prob_blocked < 0.5:
                 print("Go front")
-            else:
-                writeNumber(xc)
+                data[1] = 0
+           else:
+                data[1] = xc
                 if xc < 112:
                     
                     print("Turn left")
@@ -142,7 +143,7 @@ while True:
                     print("Turn right")
     else:
         print("Target not found, searching...(now ima spin)")
-    
+        data[1] = 0
     font = cv2.FONT_HERSHEY_DUPLEX
     frame = cv2.putText(frame, 'Free: '+str(float(1-prob_blocked)), (10, 30), font, 1, (0, 250, 0), 1)
     frame = cv2.putText(frame, 'Blocked: '+str(float(prob_blocked)), (10, 60), font, 1, (0, 0, 250), 1)
@@ -155,7 +156,7 @@ while True:
         break
     #print(time.time()-since)
     time.sleep(0.001)
-
+    writeNumber(data)
 cam.release()
 cv2.destroyAllWindows()
 
