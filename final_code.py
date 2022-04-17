@@ -11,11 +11,6 @@ import smbus
 
 print("Imported modules")
 
-#Resnet18
-#model = torchvision.models.resnet18(pretrained=False)
-#model.fc = torch.nn.Linear(512, 2)
-
-#model.load_state_dict(torch.load('best_model_resnet18.pth'))
 bus = smbus.SMBus(1)
 address = 8
 data = [0,0]
@@ -24,7 +19,16 @@ def writeNumber(value):
     bus.write_byte_data(address, 1, value)
     return -1
 
+#Resnet18
+#model = torchvision.models.resnet18(pretrained=False)
+#model.fc = torch.nn.Linear(512, 2)
 
+#model.load_state_dict(torch.load('best_model_resnet18.pth'))
+
+#Alexnet:
+#model = models.alexnet(pretrained=True)
+#model.classifier[6] = torch.nn.Linear(model.classifier[6].in_features, 2)
+#model.load_state_dict(torch.load('best_model_alexnet_T.pth'))
 
 #Squeezenet 1.1
 model = torchvision.models.squeezenet1_1(pretrained=False)
