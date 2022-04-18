@@ -1,5 +1,8 @@
 print("Program started")
-import cv2
+
+# cu ajutorul urmatoarelor linii sunt incluse librariile necesare rularii codului
+import cv2 # aceasta librarie este necesara pentru folosirea camerei
+# urmatoarele librarii sunt necesare pentru utilizarea modelului de machine learning
 import torch
 import torchvision
 import torchvision.transforms as transforms
@@ -7,7 +10,7 @@ import torch.nn.functional as F
 import PIL.Image
 import numpy as np
 import time
-import smbus
+import smbus # aceasta librarie este folosita pentru comunicarea i2c intre jetson nano si arduino
 
 print("Imported modules")
 
@@ -25,16 +28,18 @@ def writeNumber(value):
 
 #model.load_state_dict(torch.load('best_model_resnet18.pth'))
 
+# prin urmatoarele linii este incarcat modelul de machine learning
+
 #Alexnet:
-#model = models.alexnet(pretrained=True)
-#model.classifier[6] = torch.nn.Linear(model.classifier[6].in_features, 2)
-#model.load_state_dict(torch.load('best_model_alexnet_T.pth'))
+model = models.alexnet(pretrained=True)
+model.classifier[6] = torch.nn.Linear(model.classifier[6].in_features, 2)
+model.load_state_dict(torch.load('best_model_alexnet_T.pth')) # este incarcat modelul antrenat de noi cu poze
 
 #Squeezenet 1.1
-model = torchvision.models.squeezenet1_1(pretrained=False)
-model.classifier[1] = torch.nn.Conv2d(512, 2, kernel_size=(1,1), stride=(1,1))
+#model = torchvision.models.squeezenet1_1(pretrained=False)
+#model.classifier[1] = torch.nn.Conv2d(512, 2, kernel_size=(1,1), stride=(1,1))
 
-model.load_state_dict(torch.load('best_model_squeeze30.pth'))
+#model.load_state_dict(torch.load('best_model_squeeze30.pth'))
 
 device = torch.device('cuda')
 model = model.to(device)
@@ -71,20 +76,22 @@ def nothing(x):
 dispW = 224
 dispH = 224
 flip = 0
-
+# urmatoarea linie de cod contine diferitele setari ale camerei
 camSet='nvarguscamerasrc !  video/x-raw(memory:NVMM), width=3264, height=2464, format=NV12, framerate=10/1 ! nvvidconv flip-method='+str(flip)+' ! video/x-raw, width='+str(dispW)+', height='+str(dispH)+', format=BGRx ! videoconvert ! video/x-raw, format=BGR ! appsink'
+cam = cv2.VideoCapture(camSet, cv2.CAP_GSTREAMER) # apoi este initializat un obiect care reprezinta camera
 
-cam = cv2.VideoCapture(camSet, cv2.CAP_GSTREAMER)
 print("Live demo starts now...")
+
 while True:
+    # prima data, este facuta o poza prin camera din fata platformei
     ret, frame = cam.read()
 
     if frame is None:
         continue
-
+    
     since = time.time()
+    # poza este procesata pentru a putea fi folosita de modelul de machine learning
     x = preprocess(frame)
-
     y = model(x)
 
     y = F.softmax(y, dim=1)
@@ -92,7 +99,11 @@ while True:
     prob_blocked = float(y.flatten()[0])
 
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
+    
+    #Pink profile: 137 179 102 255 132 255
+    lowerPink = np.array([137, 102, 132])
+    upperPink = np.array([179, 255, 255])
+    
     #hueLow = cv2.getTrackbarPos('hueLower', 'Trackbars')
     #hueUp = cv2.getTrackbarPos('hueUpper', 'Trackbars')
 
@@ -105,9 +116,7 @@ while True:
     #Lv = cv2.getTrackbarPos('valLower', 'Trackbars')
     #Uv = cv2.getTrackbarPos('valUpper', 'Trackbars')
     
-    #Pink profile: 137 179 102 255 132 255
-    lowerPink = np.array([137, 102, 132])
-    upperPink = np.array([179, 255, 255])
+    
     #lowerB = np.array([hueLow, Ls, Lv])
     #upperB = np.array([hueUp, Us, Uv])
     #lowerB2 = np.array([hueLow2, Ls, Lv])
