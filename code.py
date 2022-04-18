@@ -41,7 +41,7 @@ while True:
         cnt = contours[0] # stim ca grupul cu aria cea mai mare este tinta
         area = cv2.contourArea(cnt)
         (x, y, w, h) = cv2.boundingRect(cnt) # cu ajutorul acestei functii sunt luate coordonatele ariei si lungimea si inaltimea acesteia
-        if area >= 50: 
+        area >= 50: 
             # Cream un crosshair care ne arata unde este tinta
             xc = int(x+w/2) # xc va reprezenta locatia tintei pe axa Ox, iar aceasta valoare va fi trimisa la arduino
             yc = int(y+h/2)
@@ -49,11 +49,16 @@ while True:
             cv2.line(frame, (xc, yc), (dispW, yc), (0, 255, 0), 1)
             cv2.line(frame, (xc, 0), (xc, yc), (0, 255, 0), 1)
             cv2.line(frame, (xc, yc), (xc, dispH), (0, 255, 0), 1)
-            data[1] = xc
-            if xc < 112:
-                print("Turn left")
+            if area>=3500: #daca aria tintei e mai mare de 3500 robotul se opreste 
+                 data[0] = 1
+                 print("Pauza baiete")
             else:
-                print("Turn right")
+                data[1] = xc #transferarea valorii pentru a fii trimisa la arduino
+                if xc < 112:
+                    print("Turn left")
+                else:
+                    print("Turn right")
+            
     else:
         print("Target not found, searching...(now ima spin)")
         data[1] = 0
@@ -65,8 +70,7 @@ while True:
     key = cv2.waitKey(1)
     if key == ord('q'):
         break
-
-    writeNumber(data)
+    bus.write_i2c_block_data(address, 1, data) #trimimiterea valorilor la arduino
     time.sleep(0.001)
 
 cam.release()
