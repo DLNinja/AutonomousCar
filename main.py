@@ -62,8 +62,7 @@ while True:
     
     cv2.imshow('nanoCam', frame)
     #cv2.moveWindow('nanoCam', 0, 0)
-    
-    #bus.write_i2c_block_data(address, 1, data)
+    bus.write_i2c_block_data(address, 1, data)
     print(str(data[0])+ " " + str(data[1]))
     time.sleep(0.001)
 
