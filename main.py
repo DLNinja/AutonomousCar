@@ -30,7 +30,6 @@ while True:
 
     FGmaskComp = cv2.inRange(hsv, lower, upper)
     cv2.imshow('FG mask comp', FGmaskComp)
-    #cv2.moveWindow('FG mask comp', 0, 410)
 
     contours, _ = cv2.findContours(FGmaskComp, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key=lambda x: cv2.contourArea(x), reverse=True)
@@ -39,7 +38,6 @@ while True:
         area = cv2.contourArea(cnt)
         (x, y, w, h) = cv2.boundingRect(cnt)
         if area >= 10: 
-            # Crosshair:
             xc = int(x+w/2)
             yc = int(y+h/2)
             cv2.line(frame, (0, yc), (xc, yc), (0, 255, 0), 1)
@@ -62,7 +60,7 @@ while True:
         data[1] = 0
     
     cv2.imshow('nanoCam', frame)
-    #cv2.moveWindow('nanoCam', 0, 0)
+    
     bus.write_i2c_block_data(address, 1, data)
     print(str(data[0])+ " " + str(data[1]))
     time.sleep(0.001)
@@ -73,5 +71,3 @@ while True:
 
 cam.release()
 cv2.destroyAllWindows()
-
-
